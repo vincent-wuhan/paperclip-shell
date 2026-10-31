@@ -1,3 +1,14 @@
+
+## Paperclip 生态项目簇
+
+| 仓库 | 角色 |
+| --- | --- |
+| [tradewind](https://github.com/vincent-wuhan/tradewind) | 信风·运营中台插件族（账号资产/审批门/账本/出口路由/multica 桥） |
+| [paperclip-shell](https://github.com/vincent-wuhan/paperclip-shell) | 桌面/移动客户端构建器 |
+| [paperclip-zh](https://github.com/vincent-wuhan/paperclip-zh) | 界面汉化语言包 |
+
+fork 自 louloulin，独立维护开发。
+
 # paperclip-shell
 
 Standalone desktop & mobile clients for [Paperclip](https://github.com/paperclipai/paperclip).
