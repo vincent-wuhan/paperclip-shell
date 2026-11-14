@@ -71,7 +71,7 @@ export function aboutHtml(info: AboutInfo): string {
     [row("Data folder", dataHome(), true), row("Logs folder", logsDir(), true)].join(""),
   );
 
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>About Paperclip</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>About Benyue Console</title>
 <style>
 ${shellCss({ titleBarInset })}
 body { overflow: auto; }
@@ -124,15 +124,15 @@ ${backdropHtml("about")}
     <div class="head">
       ${logoHtml({ animated: false })}
       <div>
-        <h1>Paperclip Desktop</h1>
+        <h1>Benyue Console Desktop</h1>
         <p class="meta">Version ${escapeHtml(version)} · ${escapeHtml(process.platform)} ${escapeHtml(process.arch)}</p>
       </div>
     </div>
-    <p class="sub">A local Paperclip workspace running on this machine. No account or external service is required.</p>
+    <p class="sub">A local Benyue Console workspace running on this machine. No account or external service is required.</p>
     ${server}
     ${runtime}
     ${storage}
-    <div class="foot">Paperclip Desktop ${escapeHtml(version)}</div>
+    <div class="foot">Benyue Console Desktop ${escapeHtml(version)}</div>
   </section>
 </main>
 </body></html>`;
@@ -155,7 +155,7 @@ export function openAboutWindow(info: AboutInfo): BrowserWindow {
     minimizable: false,
     maximizable: false,
     fullscreenable: false,
-    title: "About Paperclip",
+    title: "About Benyue Console",
     backgroundColor: SHELL_BG,
     ...(process.platform === "darwin"
       ? {

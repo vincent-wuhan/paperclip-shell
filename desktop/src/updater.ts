@@ -191,7 +191,7 @@ export async function checkForUpdates(
     const choice = await dialog.showMessageBox({
       type: "info",
       title: "Update available",
-      message: `Paperclip ${result.version ?? "update"} is available.`,
+      message: `Benyue Console ${result.version ?? "update"} is available.`,
       detail: "Download it now? You can keep working while it downloads.",
       buttons: ["Download", "Later"],
       defaultId: 0,
@@ -204,7 +204,7 @@ export async function checkForUpdates(
         const ready = await dialog.showMessageBox({
           type: "info",
           title: "Update ready",
-          message: `Paperclip ${result.version ?? "update"} has been downloaded.`,
+          message: `Benyue Console ${result.version ?? "update"} has been downloaded.`,
           detail: "Restart now to install it.",
           buttons: ["Restart now", "Later"],
           defaultId: 0,

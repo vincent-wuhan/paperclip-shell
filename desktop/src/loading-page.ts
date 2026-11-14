@@ -36,7 +36,7 @@ function stagesHtml(): string {
 }
 
 export function loadingPage({ titleBarInset = false }: PageOptions = {}): string {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Paperclip</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Benyue Console</title>
 <style>
 ${shellCss({ titleBarInset })}
 .card { width: min(432px, calc(100vw - 48px)); padding: 28px 30px 22px; }
@@ -174,7 +174,7 @@ ${backdropHtml("loading")}
     <div class="head">
       ${logoHtml({ animated: true })}
       <div class="heading">
-        <h1>Paperclip</h1>
+        <h1>奔悦业务台</h1>
         <p class="sub">Preparing your local workspace</p>
       </div>
     </div>
@@ -240,7 +240,7 @@ export function errorPage(
   logsPath: string,
   { titleBarInset = false }: PageOptions = {},
 ): string {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Paperclip</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Benyue Console</title>
 <style>
 ${shellCss({ titleBarInset })}
 .card {
@@ -303,10 +303,10 @@ ${backdropHtml("error")}
 <main class="scene">
   <section class="card" role="alert">
     <span class="badge"><i></i>Startup failed</span>
-    <h1>Paperclip couldn’t start</h1>
+    <h1>Benyue Console couldn’t start</h1>
     <p>The local server did not become ready. Full logs are in <code>${escapeHtml(logsPath)}</code>.</p>
     <pre>${escapeHtml(message)}</pre>
-    <div class="foot"><span class="dot"></span>Restart the local server from the Paperclip menu after fixing the cause.</div>
+    <div class="foot"><span class="dot"></span>Restart the local server from the Benyue Console menu after fixing the cause.</div>
   </section>
 </main>
 </body></html>`;

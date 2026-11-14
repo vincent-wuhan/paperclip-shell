@@ -51,7 +51,7 @@ export function createTray(actions: TrayActions, initial: TrayState): ShellTray 
   if (!image.isEmpty()) image.setTemplateImage(true);
 
   const tray = new Tray(image) as ShellTray;
-  tray.setToolTip("Paperclip");
+  tray.setToolTip("奔悦业务台");
 
   let state = initial;
   const render = () => {
@@ -64,7 +64,7 @@ export function createTray(actions: TrayActions, initial: TrayState): ShellTray 
     const menu = Menu.buildFromTemplate([
       { label: statusLabel, enabled: false },
       { type: "separator" },
-      { label: "Open Paperclip", click: actions.openWindow, enabled: state.phase === "running" },
+      { label: "Open Benyue Console", click: actions.openWindow, enabled: state.phase === "running" },
       { type: "separator" },
       { label: "Open data folder", click: actions.openDataFolder },
       { label: "Open logs folder", click: actions.openLogsFolder },
@@ -76,10 +76,10 @@ export function createTray(actions: TrayActions, initial: TrayState): ShellTray 
         click: actions.checkUpdates,
       },
       { type: "separator" },
-      { label: "Quit Paperclip", click: actions.quit },
+      { label: "Quit Benyue Console", click: actions.quit },
     ]);
     tray.setContextMenu(menu);
-    tray.setToolTip(`Paperclip — ${statusLabel.replace(/…$/, "")}`);
+    tray.setToolTip(`奔悦业务台 — ${statusLabel.replace(/…$/, "")}`);
   };
   render();
 
