@@ -129,3 +129,11 @@ if (!zhPackRoot) {
   writeFileSync(path.join(pluginOut, "plugin.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   log(STEP, `plugins: staged paperclip-zh-pack@${manifest.version} -> ${pluginOut}`);
 }
+
+// --- vertical plugins: digest-verified bundles for server auto-install -----
+//
+// Stages <repo>/.stage-plugins/<pkg> into resources/bundled-plugins with a
+// distribution/catalog.json the server verifies before importing any bytes.
+// Skips gracefully when the input tree is absent. See
+// scripts/stage-vertical-plugins.mjs and docs/bundled-vertical-plugins.md.
+run(process.execPath, [path.join(desktopRoot, "scripts", "stage-vertical-plugins.mjs")]);

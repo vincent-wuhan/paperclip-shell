@@ -50,6 +50,19 @@ export function serverLogFile(): string {
   return path.join(logsDir(), "server.log");
 }
 
+/**
+ * Bundled server-plugin root the Paperclip server auto-installs from
+ * (PAPERCLIP_BUNDLED_PLUGIN_ROOT). Holds `distribution/<key>/` bundles plus
+ * the digest-verified `distribution/catalog.json`, staged by
+ * scripts/stage-vertical-plugins.mjs. Packaged:
+ * <app>/Contents/Resources/bundled-plugins (electron-builder extraResources).
+ * Dev: desktop/resources/bundled-plugins.
+ */
+export function serverBundledPluginsRoot(): string {
+  if (app.isPackaged) return path.join(process.resourcesPath, "bundled-plugins");
+  return path.resolve(moduleDir, "..", "resources", "bundled-plugins");
+}
+
 export function assertServerStaged(): void {
   const entry = serverEntry();
   if (!existsSync(entry)) {

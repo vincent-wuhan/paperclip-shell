@@ -1,10 +1,28 @@
 import { spawn, type ChildProcess } from "node:child_process";
-import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
+import { createWriteStream, existsSync, mkdirSync, type WriteStream } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { serverEntry, serverRoot, dataHome, logsDir, serverLogFile } from "./paths.js";
+import { serverEntry, serverRoot, dataHome, logsDir, serverLogFile, serverBundledPluginsRoot } from "./paths.js";
 import { resolveUserPath } from "./user-path.js";
 import { ENTRY_ENV, SHIM_ENV, writeNodeShim } from "./node-shim.js";
+
+/**
+ * Auto-install keys for the first-party vertical plugins bundled with the
+ * desktop build. Each key maps to a bundle under
+ * <bundled root>/distribution/ declared in catalog.json (staged by
+ * scripts/stage-vertical-plugins.mjs); keys and catalog entries must stay
+ * in sync.
+ */
+export const DESKTOP_AUTO_INSTALL_KEYS = [
+  "beacon",
+  "tradewind",
+  "tradewind.bilibili",
+  "tradewind.channels",
+  "tradewind.douyin",
+  "tradewind.wechat",
+  "walker",
+  "walker.opskeeper",
+] as const;
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -77,6 +95,17 @@ export async function startServer(options: SupervisorOptions = {}): Promise<Star
   // a shim that re-exports the runtime as Node regardless of the environment.
   const entry = serverEntry();
   env[ENTRY_ENV] = entry;
+
+  // First-party vertical plugins: point the server at the bundled root and
+  // extend the self-hosted auto-install list. The server refuses to start on
+  // auto-install keys that resolve to no bundle, so only inject when the
+  // staged distribution catalog is actually present (dev builds without a
+  // plugin stage keep the stock kubernetes-only behavior).
+  const bundledRoot = serverBundledPluginsRoot();
+  if (existsSync(path.join(bundledRoot, "distribution", "catalog.json"))) {
+    env.PAPERCLIP_BUNDLED_PLUGIN_ROOT = bundledRoot;
+    env.PAPERCLIP_DESKTOP_AUTO_INSTALL_KEYS = DESKTOP_AUTO_INSTALL_KEYS.join(",");
+  }
   if (!standaloneNode) {
     const shim = writeNodeShim(
       path.join(dataHome(), "bin", "paperclip-node"),
