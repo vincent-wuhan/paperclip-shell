@@ -16,7 +16,7 @@
 // Defaults resolve against this checkout so `npm run build` can call it too.
 
 import { createHash } from "node:crypto";
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { desktopRoot, log } from "./lib.mjs";
 
@@ -119,3 +119,16 @@ writeFileSync(
   "utf8",
 );
 log(STEP, `catalog with ${plugins.length} plugins -> ${path.join(distributionDir, "catalog.json")}`);
+
+// Plugin workers externalize heavyweight runtime deps (e.g. playwright) and
+// expect them to resolve from node_modules. In the packaged layout the
+// distribution root sits next to the bundled server tree, which already
+// carries those deps — expose it through a relative symlink so Node's
+// upward module resolution finds them without duplicating ~1GB.
+const sharedNodeModules = path.join(distributionDir, "node_modules");
+const symlinkTarget = "../../server/node_modules";
+if (!existsSync(sharedNodeModules)) {
+  rmSync(sharedNodeModules, { recursive: true, force: true });
+  symlinkSync(symlinkTarget, sharedNodeModules);
+  log(STEP, `linked ${sharedNodeModules} -> ${symlinkTarget}`);
+}
