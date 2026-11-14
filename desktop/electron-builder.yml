@@ -1,6 +1,6 @@
-appId: ai.paperclip.desktop
-productName: Paperclip
-copyright: Copyright © Paperclip
+appId: xin.yueming.benyue.console
+productName: Benyue Console
+copyright: Copyright © Benyue
 
 directories:
   output: release

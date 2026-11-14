@@ -75,7 +75,7 @@ function createWindow(): BrowserWindow {
     // One background colour for the window, the loading screen and About: no
     // white flash and no seam between native chrome and content.
     backgroundColor: SHELL_BG,
-    title: "Paperclip",
+    title: "奔悦业务台",
     ...(CUSTOM_TITLEBAR
       ? {
           titleBarStyle: "hiddenInset" as const,
@@ -128,7 +128,7 @@ function showAbout(): void {
 async function exportLogsAction(): Promise<void> {
   const suggested = path.join(app.getPath("downloads"), defaultLogBundleName());
   const choice = await dialog.showSaveDialog({
-    title: "Export Paperclip logs",
+    title: "Export Benyue Console logs",
     defaultPath: suggested,
     filters: [{ name: "Log bundle", extensions: ["log"] }],
   });
@@ -238,9 +238,9 @@ function pluginsSubmenu(): Electron.MenuItemConstructorOptions[] {
 function installMenu(): void {
   const template: Electron.MenuItemConstructorOptions[] = [
     {
-      label: "Paperclip",
+      label: "Benyue Console",
       submenu: [
-        { label: "About Paperclip", click: () => showAbout() },
+        { label: "About Benyue Console", click: () => showAbout() },
         { type: "separator" },
         { label: "Open data folder", click: () => void shell.openPath(dataHome()) },
         { label: "Open logs folder", click: () => void shell.openPath(logsDir()) },
@@ -416,7 +416,7 @@ async function boot(): Promise<void> {
       await supervisor?.stop();
       app.exit(1);
     } else {
-      void dialog.showMessageBox({ type: "error", message: "Paperclip couldn’t start", detail: message });
+      void dialog.showMessageBox({ type: "error", message: "Benyue Console couldn’t start", detail: message });
     }
   }
 }
