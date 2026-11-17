@@ -1,5 +1,6 @@
 import { spawn, type ChildProcess } from "node:child_process";
-import { createWriteStream, existsSync, mkdirSync, type WriteStream } from "node:fs";
+import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync, type WriteStream } from "node:fs";
+import { randomBytes } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { serverEntry, serverRoot, dataHome, logsDir, serverLogFile, serverBundledPluginsRoot } from "./paths.js";
@@ -90,6 +91,14 @@ export async function startServer(options: SupervisorOptions = {}): Promise<Star
     pathEntries: userPath.value.split(":").filter(Boolean).length,
   });
   const env = serverEnv(port, userPath.value);
+  // Authenticated mode requires BETTER_AUTH_SECRET; persist one per instance
+  // (dataHome survives restarts) instead of baking a secret into the repo.
+  const secretPath = path.join(dataHome(), "auth-secret.key");
+  if (!existsSync(secretPath)) {
+    mkdirSync(path.dirname(secretPath), { recursive: true });
+    writeFileSync(secretPath, randomBytes(32).toString("hex") + "\n", { mode: 0o600 });
+  }
+  env.BETTER_AUTH_SECRET = readFileSync(secretPath, "utf8").trim();
   if (standaloneNode) delete env.ELECTRON_RUN_AS_NODE;
   else env.ELECTRON_RUN_AS_NODE = "1";
 
