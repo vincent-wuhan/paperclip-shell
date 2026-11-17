@@ -449,6 +449,13 @@ if (!gotLock) {
     ipcMain.on("plugins:renderer-payload", (event, href) => {
       event.returnValue = rendererPayload(typeof href === "string" ? href : "");
     });
+    // Benyue Console defaults to a Chinese-first experience: on first run the
+    // bundled zh pack is installed and enabled before any page loads. Later
+    // runs keep whatever the user chose via the menu toggle.
+    if (!isInstalled(ZH_PACK_ID)) {
+      const zhPack = installBundled(ZH_PACK_ID);
+      if (zhPack) setEnabled(ZH_PACK_ID, true);
+    }
     installMenu();
     installTray();
     initUpdater({
