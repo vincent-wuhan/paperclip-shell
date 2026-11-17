@@ -61,7 +61,9 @@ function serverEnv(port: number, userPath: string): NodeJS.ProcessEnv {
     PAPERCLIP_INSTANCE_ID: "desktop",
     PAPERCLIP_MIGRATION_PROMPT: "never",
     PAPERCLIP_MIGRATION_AUTO_APPLY: "true",
-    PAPERCLIP_DEPLOYMENT_MODE: "local_trusted",
+    // Authenticated mode: assistant connections (MCP) require real user
+    // accounts; better-auth only initializes outside local_trusted.
+    PAPERCLIP_DEPLOYMENT_MODE: "authenticated",
     PAPERCLIP_BIND: "loopback",
     PAPERCLIP_OPEN_ON_LISTEN: "false",
     NODE_ENV: "production",
