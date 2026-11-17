@@ -66,6 +66,9 @@ function serverEnv(port: number, userPath: string): NodeJS.ProcessEnv {
     PAPERCLIP_OPEN_ON_LISTEN: "false",
     NODE_ENV: "production",
     PORT: String(port),
+    // Assistant connections (public MCP): loopback-only origin derived from the
+    // actual listen port so OAuth issuer/resource stay consistent.
+    PAPERCLIP_PUBLIC_URL: `http://127.0.0.1:${port}`,
     // Electron's Node exposes electron-specific version keys; the server only
     // cares about process.versions.node, which is Electron's bundled Node.
     ELECTRON_RUN_AS_NODE: undefined as unknown as string,
