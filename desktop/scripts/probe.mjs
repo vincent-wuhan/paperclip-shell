@@ -23,7 +23,7 @@ import path from "node:path";
 import { log, resolveElectronBinary, spawnServer, stageDir, waitFor } from "./lib.mjs";
 
 const STEP = "probe";
-const PORT = Number(process.env.PAPERCLIP_SHELL_PROBE_PORT ?? 3187);
+const PORT = Number(process.env.PAPERCLIP_SHELL_PROBE_PORT ?? 3287);
 const home = mkdtempSync(path.join(tmpdir(), "paperclip-desktop-probe-"));
 const electron = resolveElectronBinary();
 let child;
@@ -85,12 +85,16 @@ async function main() {
   const stdout = [];
   const stderr = [];
   let detectedPort = PORT;
+  let childReportedPort = false;
 
   const scan = (chunk) => {
     const text = chunk.toString();
     stdout.push(text);
     const match = text.match(/http:\/\/(?:127\.0\.0\.1|localhost):(\d+)/);
-    if (match) detectedPort = Number(match[1]);
+    if (match) {
+      detectedPort = Number(match[1]);
+      childReportedPort = true;
+    }
   };
   child.stdout.on("data", scan);
   child.stderr.on("data", (chunk) => stderr.push(chunk.toString()));
@@ -109,7 +113,7 @@ async function main() {
             `server exited early (code=${exited.code} signal=${exited.signal})\n${stderr.join("").slice(-2000)}`,
           );
         }
-        return healthOk(detectedPort);
+        return childReportedPort && healthOk(detectedPort);
       },
       { timeoutMs: 180_000, intervalMs: 1000 },
     );
