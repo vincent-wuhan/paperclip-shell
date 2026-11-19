@@ -36,6 +36,11 @@ extraResources:
   # with a digest-verified distribution/catalog.json).
   - from: resources/bundled-plugins
     to: bundled-plugins
+  # Self-contained bb-video environment (staged by
+  # scripts/stage-bbvideo-env.mjs): toolchain text + optional ffmpeg; copied
+  # to <userData>/bbvideo on first launch by dist/bootstrap-bbvideo.mjs.
+  - from: resources/bbvideo
+    to: bbvideo
 
 mac:
   category: public.app-category.productivity

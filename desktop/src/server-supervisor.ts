@@ -1,9 +1,9 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync, type WriteStream } from "node:fs";
 import { randomBytes } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { serverEntry, serverRoot, dataHome, logsDir, serverLogFile, serverBundledPluginsRoot } from "./paths.js";
+import { serverEntry, serverRoot, dataHome, logsDir, serverLogFile, serverBundledPluginsRoot, bbvideoResourcesRoot, bbvideoHome } from "./paths.js";
 import { resolveUserPath } from "./user-path.js";
 import { ENTRY_ENV, SHIM_ENV, writeNodeShim } from "./node-shim.js";
 
@@ -50,6 +50,31 @@ export interface StartedServer {
 const HEALTH_TIMEOUT_MS = Number(process.env.PAPERCLIP_DESKTOP_HEALTH_TIMEOUT_MS ?? 240_000);
 const SHUTDOWN_TIMEOUT_MS = 15_000;
 const DEFAULT_PORT = Number(process.env.PAPERCLIP_DESKTOP_PORT ?? 3187);
+
+/**
+ * Run scripts/bootstrap-bbvideo.mjs (userData copy of the bundled toolchain
+ * and ffmpeg) before the server starts. Failures are logged only.
+ */
+function bootstrapBbvideo(env: NodeJS.ProcessEnv, standaloneNode: string | undefined): void {
+  // build.mjs copies scripts/bootstrap-bbvideo.mjs into dist/, so this
+  // resolves both in dev (dist bundle) and in the packaged app.
+  const script = path.join(moduleDir, "bootstrap-bbvideo.mjs");
+  if (!existsSync(script)) return; // layout without the script: skip silently
+  try {
+    const childEnv: NodeJS.ProcessEnv = { ...env };
+    if (!standaloneNode) childEnv.ELECTRON_RUN_AS_NODE = "1";
+    else delete childEnv.ELECTRON_RUN_AS_NODE;
+    const result = spawnSync(process.execPath, [script, "--resources", path.dirname(bbvideoResourcesRoot()), "--user-data", path.dirname(bbvideoHome())], {
+      encoding: "utf8",
+      env: childEnv,
+    });
+    if (result.status !== 0) {
+      console.error(`[bbvideo] bootstrap exited ${result.status}: ${result.stderr ?? ""}`);
+    }
+  } catch (error) {
+    console.error(`[bbvideo] bootstrap failed (non-fatal): ${error}`);
+  }
+}
 
 function serverEnv(port: number, userPath: string): NodeJS.ProcessEnv {
   return {
@@ -127,6 +152,16 @@ export async function startServer(options: SupervisorOptions = {}): Promise<Star
     );
     env[SHIM_ENV] = shim;
   }
+
+  // Self-contained bb-video environment: bootstrap the userData copy of the
+  // bundled toolchain/ffmpeg BEFORE the server spawns (synchronous; a failure
+  // is logged and must not block startup), then expose the stable paths and
+  // prepend the bin dir so bare `ffmpeg` resolves to the bundled binary.
+  bootstrapBbvideo(env, standaloneNode);
+  const bbBin = path.join(bbvideoHome(), "bin");
+  env.BB_VIDEO_HOME = path.join(bbvideoHome(), "toolchain");
+  env.BB_VIDEO_PYTHON ??= "python3";
+  env.PATH = [bbBin, env.PATH].filter(Boolean).join(":");
 
   const child: ChildProcess = spawn(command, [serverBootstrapEntry()], {
     cwd: serverRoot(),

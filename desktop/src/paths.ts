@@ -63,6 +63,22 @@ export function serverBundledPluginsRoot(): string {
   return path.resolve(moduleDir, "..", "resources", "bundled-plugins");
 }
 
+/**
+ * Bundled bb-video environment (toolchain text + ffmpeg slot), staged by
+ * scripts/stage-bbvideo-env.mjs and shipped via extraResources. The runtime
+ * copy lives under <userData>/bbvideo (see scripts/bootstrap-bbvideo.mjs)
+ * because this Resources path changes with every app version.
+ */
+export function bbvideoResourcesRoot(): string {
+  if (app.isPackaged) return path.join(process.resourcesPath, "bbvideo");
+  return path.resolve(moduleDir, "..", "resources", "bbvideo");
+}
+
+/** Stable, version-independent bb-video home under userData. */
+export function bbvideoHome(): string {
+  return path.join(app.getPath("userData"), "bbvideo");
+}
+
 export function assertServerStaged(): void {
   const entry = serverEntry();
   if (!existsSync(entry)) {

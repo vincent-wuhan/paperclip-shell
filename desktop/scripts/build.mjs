@@ -77,6 +77,12 @@ await build({
 
 log(STEP, `bundled ${Object.keys(result.metafile.inputs).length} inputs -> ${outdir}`);
 
+// The bb-video first-launch bootstrap is invoked by the compiled
+// server-supervisor (spawned as a plain Node script), so it must sit next to
+// the bundle inside the packaged app — src/server-supervisor.ts resolves it
+// relative to its own module directory.
+copyFileSync(path.join(desktopRoot, "scripts", "bootstrap-bbvideo.mjs"), path.join(outdir, "bootstrap-bbvideo.mjs"));
+
 // --- plugins: stage the installable catalog into resources/plugins ----------
 //
 // The Chinese language pack lives in its own repository and is consumed as a
@@ -137,3 +143,10 @@ if (!zhPackRoot) {
 // Skips gracefully when the input tree is absent. See
 // scripts/stage-vertical-plugins.mjs and docs/bundled-vertical-plugins.md.
 run(process.execPath, [path.join(desktopRoot, "scripts", "stage-vertical-plugins.mjs")]);
+
+// --- bb-video environment: bundled toolchain text + ffmpeg slot -------------
+//
+// Stages <paperclip repo>/skills/bb-video (minus videos/ and .venv/) into
+// resources/bbvideo/toolchain with a version stamp consumed by the first-launch
+// bootstrap. ffmpeg itself is not downloaded; see resources/bbvideo/bin/README.md.
+run(process.execPath, [path.join(desktopRoot, "scripts", "stage-bbvideo-env.mjs")]);

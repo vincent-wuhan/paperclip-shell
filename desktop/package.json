@@ -9,7 +9,7 @@
     "node": ">=24.11.0"
   },
   "scripts": {
-    "stage": "node scripts/stage-server.mjs",
+    "stage": "node scripts/stage-server.mjs && node scripts/stage-bbvideo-env.mjs",
     "preflight": "node scripts/preflight-runtime.mjs",
     "probe": "node scripts/build.mjs && node scripts/probe.mjs",
     "build": "node scripts/build.mjs",

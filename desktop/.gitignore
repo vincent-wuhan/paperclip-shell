@@ -6,3 +6,10 @@ release/
 
 # Staged plugin catalog (scripts/build.mjs; source lives in its own repo)
 resources/
+# The bb-video ffmpeg slot README is source, not staged output; the actual
+# binary and the staged toolchain stay ignored.
+!resources/bbvideo/
+resources/bbvideo/*
+!resources/bbvideo/bin/
+resources/bbvideo/bin/*
+!resources/bbvideo/bin/README.md
