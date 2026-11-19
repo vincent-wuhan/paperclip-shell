@@ -61,6 +61,20 @@ if (!existsSync(stageServerEntry)) {
 }
 
 const releaseDir = path.join(desktopRoot, "release");
+
+// Brand overrides for profile builds (scripts/build-console.sh --profile):
+// electron-builder config flags win over electron-builder.yml, so the checked-in
+// Benyue Console branding stays the default and profiles inject their own.
+const brandOverrides = [];
+if (process.env.BB_PROFILE_APP_ID?.trim()) {
+  brandOverrides.push(`-c.appId=${process.env.BB_PROFILE_APP_ID.trim()}`);
+}
+if (process.env.BB_PROFILE_PRODUCT_NAME?.trim()) {
+  brandOverrides.push(`-c.productName=${process.env.BB_PROFILE_PRODUCT_NAME.trim()}`);
+} else if (process.env.BB_PROFILE_BRAND?.trim()) {
+  brandOverrides.push(`-c.productName=${process.env.BB_PROFILE_BRAND.trim()}`);
+}
+if (brandOverrides.length > 0) log(STEP, `brand overrides: ${brandOverrides.join(" ")}`);
 const electronBuilder = path.join(desktopRoot, "node_modules", ".bin", "electron-builder");
 if (!existsSync(electronBuilder)) {
   throw new Error("electron-builder is not installed. Run `npm install` in desktop/ first.");
@@ -109,7 +123,7 @@ for (const arch of arches) {
   });
   log(STEP, `building unpacked app (${targets.join(" ")} ${arch}) ...`);
   const buildStartedAt = Date.now();
-  run(electronBuilder, [...targets, arch, "--dir"], { cwd: desktopRoot, env: builderEnv });
+  run(electronBuilder, [...targets, arch, "--dir", ...brandOverrides], { cwd: desktopRoot, env: builderEnv });
 
   // release/ accumulates one app dir per arch (mac, mac-arm64, ...). Only touch
   // bundles this build just produced, or a stale other-arch app would get this
@@ -125,7 +139,7 @@ for (const arch of arches) {
 
     if (!dirOnly) {
       log(STEP, `building installer from ${path.basename(bundle)} ...`);
-      run(electronBuilder, [...targets, arch, "--prepackaged", bundle], {
+      run(electronBuilder, [...targets, arch, "--prepackaged", bundle, ...brandOverrides], {
         cwd: desktopRoot,
         env: builderEnv,
       });

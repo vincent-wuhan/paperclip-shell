@@ -15,6 +15,7 @@ import { ENTRY_ENV, SHIM_ENV, writeNodeShim } from "./node-shim.js";
  * in sync.
  */
 export const DESKTOP_AUTO_INSTALL_KEYS = [
+  "bb-video",
   "beacon",
   "tradewind",
   "tradewind.bilibili",
@@ -141,9 +142,23 @@ export async function startServer(options: SupervisorOptions = {}): Promise<Star
   // staged distribution catalog is actually present (dev builds without a
   // plugin stage keep the stock kubernetes-only behavior).
   const bundledRoot = serverBundledPluginsRoot();
-  if (existsSync(path.join(bundledRoot, "distribution", "catalog.json"))) {
+  const catalogFile = path.join(bundledRoot, "distribution", "catalog.json");
+  if (existsSync(catalogFile)) {
     env.PAPERCLIP_BUNDLED_PLUGIN_ROOT = bundledRoot;
-    env.PAPERCLIP_DESKTOP_AUTO_INSTALL_KEYS = DESKTOP_AUTO_INSTALL_KEYS.join(",");
+    // Profile builds bundle only a subset (BB_PROFILE in
+    // stage-vertical-plugins.mjs): the server refuses to start on auto-install
+    // keys with no bundle, so intersect the key list with the actual catalog.
+    let catalogKeys: readonly string[] = [];
+    try {
+      const catalog = JSON.parse(readFileSync(catalogFile, "utf8"));
+      catalogKeys = Array.isArray(catalog.plugins) ? catalog.plugins.map((entry: { key?: string }) => entry.key).filter(Boolean) : [];
+    } catch {
+      catalogKeys = [];
+    }
+    const keys = catalogKeys.length > 0
+      ? DESKTOP_AUTO_INSTALL_KEYS.filter((key) => catalogKeys.includes(key))
+      : [...DESKTOP_AUTO_INSTALL_KEYS];
+    if (keys.length > 0) env.PAPERCLIP_DESKTOP_AUTO_INSTALL_KEYS = keys.join(",");
   }
   if (!standaloneNode) {
     const shim = writeNodeShim(

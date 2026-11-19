@@ -24,8 +24,14 @@ const STEP = "stage-vertical-plugins";
 
 // Plugin keys are the manifest ids (dist/manifest.js `id`) — for this fleet
 // they equal the staged package directory names. Keep in sync with
-// DESKTOP_AUTO_INSTALL_KEYS in src/server-supervisor.ts.
-const PLUGIN_KEYS = [
+// DESKTOP_AUTO_INSTALL_KEYS in src/server-supervisor.ts and with the `full`
+// profile in <repo>/scripts/profiles.json.
+//
+// Profiles: BB_PROFILE (default "full") selects a subset from
+// <repo>/scripts/profiles.json (monorepo root, two levels above the desktop
+// root). When the profiles file is missing the full key list below is used.
+const FULL_PLUGIN_KEYS = [
+  "bb-video",
   "beacon",
   "tradewind",
   "tradewind.bilibili",
@@ -35,6 +41,26 @@ const PLUGIN_KEYS = [
   "walker",
   "walker.opskeeper",
 ];
+
+function resolvePluginKeys() {
+  const profileName = process.env.BB_PROFILE?.trim() || "full";
+  const profilesFile = path.resolve(desktopRoot, "..", "..", "scripts", "profiles.json");
+  if (profileName === "full" && !existsSync(profilesFile)) return FULL_PLUGIN_KEYS;
+  if (!existsSync(profilesFile)) {
+    throw new Error(`${STEP}: BB_PROFILE=${profileName} but ${profilesFile} not found`);
+  }
+  const profiles = JSON.parse(readFileSync(profilesFile, "utf8"));
+  const profile = profiles[profileName];
+  if (!profile?.plugins?.length) throw new Error(`${STEP}: profile "${profileName}" missing or empty in ${profilesFile}`);
+  for (const key of profile.plugins) {
+    if (!FULL_PLUGIN_KEYS.includes(key)) {
+      throw new Error(`${STEP}: profile "${profileName}" references unknown plugin key "${key}"`);
+    }
+  }
+  return profile.plugins;
+}
+
+const PLUGIN_KEYS = resolvePluginKeys();
 
 function arg(name) {
   const index = process.argv.indexOf(`--${name}`);
