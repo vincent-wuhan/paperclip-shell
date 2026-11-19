@@ -43,5 +43,11 @@ export function writeNodeShim(shimPath, runtimeBinary) {
   ].join("\n");
   writeFileSync(shimPath, script, "utf8");
   chmodSync(shimPath, 0o755);
+  // Also expose a `node` name so scripts with `#!/usr/bin/env node` shebangs
+  // (e.g. claude-agent-acp) resolve the bundled runtime from server-spawned
+  // children, whose PATH may not include any system Node installation.
+  const nodeAlias = path.join(path.dirname(shimPath), "node");
+  writeFileSync(nodeAlias, script, "utf8");
+  chmodSync(nodeAlias, 0o755);
   return shimPath;
 }

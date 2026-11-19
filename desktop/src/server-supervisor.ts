@@ -82,7 +82,9 @@ function serverEnv(port: number, userPath: string): NodeJS.ProcessEnv {
     ...process.env,
     // A Finder-launched app gets a minimal PATH, which hides user-installed
     // agent CLIs (claude, codex, ...) from the server's command resolution.
-    PATH: userPath,
+    // Prepend the shim dir so `node` (and sibling tool shims) always resolve
+    // for server-spawned children regardless of the user's shell PATH.
+    PATH: `${path.join(dataHome(), "bin")}:${userPath}`,
     // Never inherit a developer's own Paperclip home / instance.
     PAPERCLIP_HOME: dataHome(),
     PAPERCLIP_INSTANCE_ID: "desktop",
